@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QApplication
+from PyQt6.QtGui import QPen, QPainter
 from PyQt6.QtCore import Qt
 
 import sys
@@ -10,6 +11,14 @@ class CCircle:
         self.y = y
         self.radius = radius
         self.selected = False
+    
+    def contains(self, x, y):
+        return (x - self.x) ** 2 + (y - self.y) ** 2 <= self.radius ** 2
+    
+    def draw(self, painter: QPainter):
+        pen = QPen(Qt.GlobalColor.red if self.selected else Qt.GlobalColor.black, 2)
+        painter.setPen(pen)
+        painter.drawEllipse(self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2)
 
 class Storage:
     def __init__(self):
