@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QApplication
-from PyQt6.QtGui import QPen, QPainter, QMouseEvent
+from PyQt6.QtGui import QPen, QPainter, QMouseEvent, QKeyEvent
 from PyQt6.QtCore import Qt, QRectF
 
 import sys
@@ -57,6 +57,10 @@ class App(QWidget):
                     else:
                         for c in self.storage.get_all():
                             c.selected = False
+                        # выделение всех пересекающихся кругов
+                        # for other in self.storage.get_all():
+                        #     if other.contains(x, y):
+                        #         other.selected = True
                         circle.selected = True
                     clicked_on_object = True
                     break
@@ -65,6 +69,16 @@ class App(QWidget):
                     c.selected = False
                 self.storage.add(CCircle(x, y))
             self.update()
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key.Key_Backspace:
+            to_remove = [c for c in self.storage.get_all() if c.selected]
+            for c in to_remove:
+                self.storage.remove(c)
+            self.update()
+    
+    def resizeEvent(self, a0):
+        self.update()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
