@@ -29,6 +29,33 @@ class Storage:
         self.__data.remove(obj)
     def get_all(self):
         return self.__data[:]
+    def select(self, event: QMouseEvent):
+        pos = event.position()
+        x = pos.x()
+        y = pos.y()
+        clicked_on_object = False
+        for circle in reversed(self.get_all()):
+            if circle.contains(x, y):
+                if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+                    circle.selected = not circle.selected
+                else:
+                    for c in self.get_all():
+                        c.selected = False
+                    # выделение всех пересекающихся кругов
+                    # for other in self.get_all():
+                    #     if other.contains(x, y):
+                    #         other.selected = True
+                    circle.selected = True
+                clicked_on_object = True
+                break
+        if not clicked_on_object:
+            for c in self.get_all():
+                c.selected = False
+            self.add(CCircle(x, y))
+    def delete_selected(self):
+        to_remove = [c for c in self.get_all() if c.selected]
+        for c in to_remove:
+            self.remove(c)
 
 class App(QWidget):
     def __init__(self):
@@ -46,35 +73,12 @@ class App(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
-            pos = event.position()
-            x = pos.x()
-            y = pos.y()
-            clicked_on_object = False
-            for circle in reversed(self.storage.get_all()):
-                if circle.contains(x, y):
-                    if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-                        circle.selected = not circle.selected
-                    else:
-                        for c in self.storage.get_all():
-                            c.selected = False
-                        # выделение всех пересекающихся кругов
-                        # for other in self.storage.get_all():
-                        #     if other.contains(x, y):
-                        #         other.selected = True
-                        circle.selected = True
-                    clicked_on_object = True
-                    break
-            if not clicked_on_object:
-                for c in self.storage.get_all():
-                    c.selected = False
-                self.storage.add(CCircle(x, y))
+            self.storage.select(event)
             self.update()
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key.Key_Backspace:
-            to_remove = [c for c in self.storage.get_all() if c.selected]
-            for c in to_remove:
-                self.storage.remove(c)
+            self.storage.delete_selected()
             self.update()
     
     def resizeEvent(self, a0):
